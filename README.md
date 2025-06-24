@@ -25,4 +25,8 @@
 
 ![изображение](https://github.com/user-attachments/assets/0f36d2d8-b901-482d-ab72-c34845d90031)
 
+**Для запуска тестов перейдите в папку проекта и запустите yarn hardhat:test
+
+
+![изображение](https://github.com/user-attachments/assets/c3f44d23-9b61-4ca3-b343-bb965da68dd7)
 
