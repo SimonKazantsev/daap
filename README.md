@@ -6,9 +6,9 @@
 
 Клонируйте репозиторий: https://github.com/SimonKazantsev/daap
 
-Установите зависимости: yarn install
-Создайте тестовую сеть: yarn chain
-Деплой контракта: yarn deploy
+Установите зависимости: yarn install \n
+Создайте тестовую сеть: yarn chain \n
+Деплой контракта: yarn deploy \n 
 Запуск приложения: yarn start
 
 **Возможности:**
