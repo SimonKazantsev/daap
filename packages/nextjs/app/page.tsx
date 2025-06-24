@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
 
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // замените на ваш адрес
 
 const CONTRACT_ABI = [
   "function sendMessage(string _content) public",
@@ -22,6 +22,9 @@ const Home: React.FC = () => {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ id: number; content: string; sender: string; votes: number }[]>([]);
 
+  // Новое состояние для ошибок голосования по сообщениям
+  const [voteErrors, setVoteErrors] = useState<{ [messageId: number]: string | null }>({});
+
   // Получение всех сообщений
   const fetchMessages = async () => {
     if (!window.ethereum) return;
@@ -30,7 +33,6 @@ const Home: React.FC = () => {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
       const msgs: any[] = await contract.getAllMessages();
 
-      // обработка сообщения
       setMessages(
         msgs.map((msg: any) => ({
           id: Number(msg.id),
@@ -49,6 +51,9 @@ const Home: React.FC = () => {
     if (!window.ethereum || !connectedAddress) return;
     try {
       setLoading(true);
+      // Очистка ошибки для этого сообщения перед голосованием
+      setVoteErrors(prev => ({ ...prev, [messageId]: null }));
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
@@ -57,9 +62,16 @@ const Home: React.FC = () => {
       setTxHash(tx.hash);
       await tx.wait();
 
-      fetchMessages(); // Здесь я обновляю список после голосования
-    } catch (error) {
+      fetchMessages(); // Обновляем список сообщений после голосования
+    } catch (error: any) {
       console.error("Ошибка при голосовании:", error);
+
+      // Проверка текста ошибки и установка соответствующей ошибки для этого сообщения
+      if (error?.message?.includes("Already voted for this message")) {
+        setVoteErrors(prev => ({ ...prev, [messageId]: "Вы уже проголосовали за это сообщение." }));
+      } else {
+        setVoteErrors(prev => ({ ...prev, [messageId]: "Произошла ошибка при голосовании. Попробуйте еще раз." }));
+      }
     } finally {
       setLoading(false);
     }
@@ -183,18 +195,22 @@ const Home: React.FC = () => {
           <ul className="space-y-4">
             {messages.map(msg => (
               <li key={msg.id} className="border p-3 rounded shadow-sm">
+                {/* Контент сообщения */}
                 <div>
                   <strong>Сообщение:</strong> {msg.content}
                 </div>
 
+                {/* Отправитель */}
                 <div>
                   <strong>Отправитель:</strong> {msg.sender ? <Address address={msg.sender} /> : "Неизвестно"}
                 </div>
 
+                {/* Голоса */}
                 <div>
                   <strong>Голоса:</strong> {msg.votes}
                 </div>
 
+                {/* Кнопка голосовать */}
                 <button
                   onClick={() => voteForMessage(msg.id)}
                   disabled={loading}
@@ -202,6 +218,9 @@ const Home: React.FC = () => {
                 >
                   Голосовать
                 </button>
+
+                {/* Ошибка голосования по этому сообщению */}
+                {voteErrors[msg.id] && <p className="mt-2 text-sm text-red-600">{voteErrors[msg.id]}</p>}
               </li>
             ))}
           </ul>
