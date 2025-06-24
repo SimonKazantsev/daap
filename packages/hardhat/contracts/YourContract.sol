@@ -31,11 +31,7 @@ contract GroupChat {
         _;
     }
 
-    // Получение всех сообщений — через перебор messageMap невозможно,
-    // поэтому можно реализовать функцию получения сообщения по id или список всех сообщений отдельно.
-    // Для этого создадим массив для хранения всех id.
-    
-    uint256[] public allMessageIds;
+    uint256[] public allMessageIds; //id Сообщений
 
     // Отправка сообщения
     function sendMessage(string memory _content) public {
@@ -57,10 +53,8 @@ contract GroupChat {
         require(bytes(messageMap[_messageId].content).length != 0, "Message not found");
         require(!messageVoters[_messageId][msg.sender], "Already voted for this message");
 
-        // Запоминаем голос
         messageVoters[_messageId][msg.sender] = true;
 
-        // Увеличиваем счетчик голосов у сообщения
         messageMap[_messageId].votes += 1;
 
         emit MessageVoted(msg.sender, _messageId);

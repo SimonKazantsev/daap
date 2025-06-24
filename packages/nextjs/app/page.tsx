@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
 
-const CONTRACT_ADDRESS = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"; // замените на ваш адрес
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 const CONTRACT_ABI = [
   "function sendMessage(string _content) public",
@@ -30,7 +30,7 @@ const Home: React.FC = () => {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
       const msgs: any[] = await contract.getAllMessages();
 
-      // Преобразуем полученные сообщения в нужный формат
+      // обработка сообщения
       setMessages(
         msgs.map((msg: any) => ({
           id: Number(msg.id),
@@ -57,7 +57,7 @@ const Home: React.FC = () => {
       setTxHash(tx.hash);
       await tx.wait();
 
-      fetchMessages(); // Обновляем список после голосования
+      fetchMessages(); // Здесь я обновляю список после голосования
     } catch (error) {
       console.error("Ошибка при голосовании:", error);
     } finally {
@@ -65,7 +65,7 @@ const Home: React.FC = () => {
     }
   };
 
-  // Открытие/закрытие формы отправки
+  // Форма отправки (открыть/закрыть)
   const toggleSendForm = () => {
     setShowSendForm(prev => {
       if (prev) {
@@ -88,11 +88,11 @@ const Home: React.FC = () => {
       setTxHash(tx.hash);
       await tx.wait();
 
-      // Добавляем новое сообщение в локальный список для мгновенного отображения
+      // добавляю в локальный список
       setMessages(prev => [
         ...prev,
         {
-          id: Date.now(), // уникальный id для фронтенда
+          id: Date.now(), // id для списка
           content: messageText.trim(),
           sender: connectedAddress,
           votes: 0,
@@ -125,19 +125,16 @@ const Home: React.FC = () => {
       </div>
       <p className="text-center text-lg mb-4">Участвуйте в групповых обсуждениях.</p>
 
-      {/* Кнопка обновления сообщений */}
       <button onClick={fetchMessages} className="btn btn-secondary mb-4">
         Обновить сообщения
       </button>
 
-      {/* Кнопка для открытия формы отправки */}
       {!showSendForm && (
         <button onClick={toggleSendForm} className="btn btn-primary mb-4">
           Написать сообщение
         </button>
       )}
 
-      {/* Форма отправки */}
       {showSendForm && (
         <div className="w-full max-w-md px-4 mb-8">
           <h2 className="text-xl mb-4">Напишите сообщение</h2>
@@ -178,7 +175,6 @@ const Home: React.FC = () => {
         </div>
       )}
 
-      {/* Отображение сообщений */}
       <div className="w-full max-w-xl">
         <h2 className="text-xl mb-4">Сообщения</h2>
         {messages.length === 0 ? (
